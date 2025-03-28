@@ -233,6 +233,9 @@ importers:
       '@tg-search/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@types/node':
+        specifier: ^22.13.11
+        version: 22.13.11
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
