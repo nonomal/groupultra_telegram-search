@@ -9,8 +9,8 @@ import { useExport } from '../../apis/commands/useExport'
 import ExportStatus from '../../components/export/ExportStatus.vue'
 import NeedLogin from '../../components/NeedLogin.vue'
 import { useChatTypeOptions, useExportMethodOptions, useMessageTypeOptions } from '../../composables/useOptions'
-import { useSessionStore } from '../../composables/v2/useSessionV2'
 import { useChats } from '../../store/useChats'
+import { useSessionStore } from '../../store/useSessionV2'
 
 const {
   executeExport,
@@ -19,7 +19,7 @@ const {
   cleanup,
 } = useExport()
 const sessionStore = useSessionStore()
-const { isConnected } = storeToRefs(sessionStore)
+const { isLoggedIn } = storeToRefs(sessionStore)
 
 const { t } = useI18n()
 const chatStore = useChats()
@@ -144,7 +144,7 @@ async function handleExport() {
   startTime.value = Date.now()
 
   // 检查是否已连接到Telegram
-  if (!isConnected.value) {
+  if (!isLoggedIn.value) {
     toast.error(t('component.export_command.not_connect'))
     return
   }
@@ -232,7 +232,7 @@ watch(() => currentCommand.value?.status, (newStatus) => {
 
 <template>
   <div class="space-y-5">
-    <NeedLogin :is-connected="isConnected" />
+    <NeedLogin :is-connected="isLoggedIn" />
 
     <!-- Export configuration -->
     <div class="overflow-hidden rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100">

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
-import { useSessionStore } from '../composables/v2/useSessionV2'
+import { useSessionStore } from '../store/useSessionV2'
 
 type LoginStep = 'phone' | 'code' | 'password' | 'complete'
 

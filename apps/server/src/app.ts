@@ -112,7 +112,7 @@ export function setupWsRoutes(app: App) {
         sendWsError(peer, error)
       })
 
-      sendWsEvent(peer, 'server:connected', { sessionId })
+      sendWsEvent(peer, 'server:connected', { sessionId, connected: state.isConnected ?? false })
 
       clientStates.set(sessionId, state)
     },

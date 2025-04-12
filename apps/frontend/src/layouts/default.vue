@@ -8,7 +8,7 @@ import { toast } from 'vue-sonner'
 import DropdownMenu from '../components/ui/DropdownMenu.vue'
 import { useDarkStore } from '../composables/dark'
 import { useLanguage } from '../composables/useLanguage'
-import { useSessionStore } from '../composables/v2/useSessionV2'
+import { useSessionStore } from '../store/useSessionV2'
 
 const router = useRouter()
 const { isDark } = useDarkStore()

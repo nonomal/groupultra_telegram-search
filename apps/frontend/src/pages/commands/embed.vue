@@ -8,15 +8,15 @@ import { useEmbed } from '../../apis/commands/useEmbed'
 import EmbedStatus from '../../components/embed/EmbedStatus.vue'
 import NeedLogin from '../../components/NeedLogin.vue'
 import ChatSelector from '../../components/sync/ChatSelector.vue'
-import { useSessionStore } from '../../composables/v2/useSessionV2'
 import { useChats } from '../../store/useChats'
+import { useSessionStore } from '../../store/useSessionV2'
 
 const { t } = useI18n()
 const chatStore = useChats()
 const { loadChats, exportedChats } = chatStore
 const { executeEmbed, currentCommand, embedProgress, cleanup } = useEmbed()
 const sessionStore = useSessionStore()
-const { isConnected } = storeToRefs(sessionStore)
+const { isLoggedIn } = storeToRefs(sessionStore)
 
 const selectedChats = ref<number[]>([])
 const showConnectButton = ref(false)
@@ -43,7 +43,7 @@ function validateInputs() {
 }
 
 async function startEmbed() {
-  if (!isConnected.value) {
+  if (!isLoggedIn.value) {
     toast.error(t('component.embed_command.not_connect'))
     return
   }
@@ -116,7 +116,7 @@ function resetState() {
 // Lifecycle
 onMounted(async () => {
   loadChats()
-  if (!isConnected.value)
+  if (!isLoggedIn.value)
     showConnectButton.value = true
 })
 
@@ -128,7 +128,7 @@ onUnmounted(() => {
 
 <template>
   <div class="space-y-4">
-    <NeedLogin :is-connected="isConnected" />
+    <NeedLogin :is-connected="isLoggedIn" />
 
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-medium">
@@ -176,7 +176,7 @@ onUnmounted(() => {
         </span>
         <button
           class="rounded-md bg-blue-500 px-4 py-2 text-white disabled:cursor-not-allowed hover:bg-blue-600 disabled:opacity-50"
-          :disabled="selectedChats.length === 0 || !isConnected || isProcessing"
+          :disabled="selectedChats.length === 0 || !isLoggedIn || isProcessing"
           @click="startEmbed"
         >
           <span v-if="isProcessing" class="flex items-center gap-2">
