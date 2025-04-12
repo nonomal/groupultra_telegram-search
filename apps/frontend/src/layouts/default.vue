@@ -52,13 +52,13 @@ async function handleLogout() {
   showUserMenu.value = false
   handleAuth().logout()
   toast.success(t('header.logout_success'))
-  router.push('/v2login')
+  router.push('/login')
 }
 
 // Handle login
 async function handleLogin() {
   showUserMenu.value = false
-  router.push('/v2login')
+  router.push('/login')
 }
 
 // Handle language change

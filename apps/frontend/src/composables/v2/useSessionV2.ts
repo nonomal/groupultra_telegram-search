@@ -107,5 +107,6 @@ export const useSessionStore = defineStore('session-v2', () => {
     handleAuth,
     getActiveSession,
     setActiveSession,
+    isConnected: computed(() => activeSessionComputed.value?.isConnected),
   }
 })
