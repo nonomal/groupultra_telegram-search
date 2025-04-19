@@ -21,13 +21,13 @@
     "stub": "unbuild --stub"
   },
   "peerDependencies": {
-    "drizzle-orm": "^0.41.0"
+    "drizzle-orm": "^0.42.0"
   },
   "dependencies": {
-    "drizzle-orm": "^0.41.0"
+    "drizzle-orm": "^0.42.0"
   },
   "devDependencies": {
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "unbuild": "^3.5.0"
   }
 }

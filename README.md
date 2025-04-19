@@ -1,11 +1,14 @@
 # Telegram Search
 
-[EN](./README_EN.md) | [TODO](https://github.com/GramSearch/telegram-search/issues/23)
+[English](./README_EN.md) | [TODO](https://github.com/GramSearch/telegram-search/issues/23)
+
+[![](https://dcbadge.limes.pink/api/server/bdS4AAxKVr)](https://discord.gg/bdS4AAxKVr)
 
 一个功能强大的 Telegram 聊天记录搜索工具，支持向量搜索和语义匹配。基于 OpenAI 的语义向量技术，让你的 Telegram 消息检索更智能、更精准。
 
 ## ⚠️ **注意**
 
+- 欢迎 PR！
 - 使用 UserBot 可能存在封号风险，请谨慎使用。
 - 由于项目处于快速迭代阶段，可能会出现数据库不兼容的情况，建议定期备份数据。
 - 获取 API key: [#111](https://github.com/GramSearch/telegram-search/issues/111)
@@ -57,12 +60,6 @@ pnpm run dev:frontend
 ```
 
 访问 `http://localhost:3333` 即可打开搜索界面。
-
-## 📚 开发文档
-
-- [开发指南](docs/development-guide.md)
-- [数据库设计](docs/database-design.md)
-- [贡献指南](CONTRIBUTING.md)
 
 ## 🚀 Activity
 
