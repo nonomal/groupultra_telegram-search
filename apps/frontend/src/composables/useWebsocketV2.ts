@@ -58,7 +58,7 @@ export function createWebsocketV2Context(sessionId: string) {
             break
 
           case 'auth:connected':
-            connectionStore.getActiveSession()!.isConnected = true
+            connectionStore.auth.connected = true
             sendEvent('entity:getMe', undefined)
             break
 

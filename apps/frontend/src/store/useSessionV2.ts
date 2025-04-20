@@ -23,6 +23,7 @@ export const useSessionStore = defineStore('session', () => {
   const authStatus = ref({
     needCode: false,
     needPassword: false,
+    connected: false,
   })
 
   const activeSessionComputed = computed(() => storageSessions.value.get(storageActiveSessionId.value))
@@ -70,11 +71,13 @@ export const useSessionStore = defineStore('session', () => {
   })
 
   function handleAuth() {
-    function login(phoneNumber: string) {
+    function login(phoneNumber: string, apiId?: number, apiHash?: string) {
       storageSessions.value.get(storageActiveSessionId.value)!.phoneNumber = phoneNumber
 
       wsContext.sendEvent('auth:login', {
         phoneNumber,
+        apiId,
+        apiHash,
       })
     }
 

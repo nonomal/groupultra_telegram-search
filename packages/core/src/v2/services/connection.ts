@@ -19,7 +19,7 @@ export interface CoreUserInfo {
 }
 
 export interface ConnectionEventToCore {
-  'auth:login': (data: { phoneNumber: string }) => void
+  'auth:login': (data: { phoneNumber: string, apiId?: number, apiHash?: string }) => void
   'auth:logout': () => void
   'auth:code': (data: { code: string }) => void
   'auth:password': (data: { password: string }) => void
@@ -95,9 +95,11 @@ export function createConnectionService(ctx: CoreContext) {
 
     async function login(loginOptions: {
       phoneNumber: string
+      apiId?: number
+      apiHash?: string
       session: StringSession
     }): PromiseResult<TelegramClient | null> {
-      const { phoneNumber, session } = loginOptions
+      const { phoneNumber, apiId, apiHash, session } = loginOptions
 
       try {
         const { data: client, error } = await init({ session })
@@ -116,10 +118,11 @@ export function createConnectionService(ctx: CoreContext) {
         const isAuthorized = await client.isUserAuthorized()
         if (!isAuthorized) {
           logger.debug('User is not authorized, signing in')
+          logger.withFields({ apiId, apiHash }).debug('Signing in with API ID and API Hash')
 
           await client.signInUser({
-            apiId: options.apiId,
-            apiHash: options.apiHash,
+            apiId: apiId || options.apiId,
+            apiHash: apiHash || options.apiHash,
           }, {
             phoneNumber,
             phoneCode: async () => {

@@ -31,7 +31,7 @@ export function authEventHandler(
     proxy: config.api.telegram.proxy,
   })
 
-  emitter.on('auth:login', async ({ phoneNumber }) => {
+  emitter.on('auth:login', async ({ phoneNumber, apiId, apiHash }) => {
     const { data: session, error: sessionError } = await loadSession(phoneNumber)
     if (sessionError) {
       return withError(sessionError, 'Failed to load session')
@@ -39,7 +39,7 @@ export function authEventHandler(
 
     logger.withFields({ session }).debug('Loaded session')
 
-    const { error: loginError } = await login({ phoneNumber, session })
+    const { error: loginError } = await login({ phoneNumber, session, apiId, apiHash })
     if (loginError) {
       return withError(loginError, 'Failed to login to Telegram')
     }

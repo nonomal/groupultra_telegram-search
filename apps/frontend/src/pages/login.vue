@@ -37,13 +37,18 @@ watch(() => connectionStore.auth.needPassword, (value) => {
     state.value.currentStep = 'password'
 })
 
+watch(() => connectionStore.auth.connected, (value) => {
+  if (value)
+    state.value.currentStep = 'complete'
+})
+
 async function handleLogin() {
   state.value.isLoading = true
 
   try {
     switch (state.value.currentStep) {
       case 'phone':
-        login(state.value.phoneNumber)
+        login(state.value.phoneNumber, Number(state.value.apiId), state.value.apiHash)
         break
       case 'code':
         submitCode(state.value.verificationCode)
