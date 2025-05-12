@@ -1,6 +1,6 @@
 packages:
   - packages/*
-  - libs/*
+  - docs/*
   - apps/*
 catalog:
   '@xsai-ext/providers-cloud': ^0.2.1

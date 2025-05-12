@@ -1,4 +1,4 @@
-version: '0.2'
+version: "0.2"
 ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
@@ -30,6 +30,7 @@ words:
   - unocss
   - unplugin
   - valibot
+  - vitepress
   - vitest
   - vueuse
   - xsai
