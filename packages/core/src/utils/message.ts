@@ -1,3 +1,4 @@
+import type { Buffer } from 'node:buffer'
 import type { UUID } from 'node:crypto'
 import type { Result } from './monad'
 
@@ -16,6 +17,7 @@ export interface CoreMessage {
   fromName: string
 
   content: string
+  media?: CoreMessageMedia[]
 
   reply: CoreMessageReply
   forward: CoreMessageForward
@@ -28,10 +30,12 @@ export interface CoreMessage {
   deletedAt?: number
 }
 
-// export interface CoreMessageMedia {
-//   type: 'photo' | 'sticker' | 'file' | 'other'
-//   uuid:
-// }
+export interface CoreMessageMedia {
+  type: 'photo' | 'video' | 'audio' | 'document'
+  uuid: UUID
+  path: string
+  media: string | Buffer<ArrayBufferLike> | undefined
+}
 
 export interface CoreMessageReply {
   isReply: boolean
