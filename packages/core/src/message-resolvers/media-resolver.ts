@@ -37,8 +37,10 @@ export function createMediaResolver(ctx: CoreContext): MessageResolver {
           if (!message.media)
             return message
 
-          const fetchedMessages = await Promise.all(
+          const fetchedMedias = await Promise.all(
             message.media.map(async (media) => {
+              logger.withFields({ media }).debug('Media')
+
               const userMediaPath = join(await useUserMediaPath(), message.chatId.toString())
               if (!existsSync(userMediaPath)) {
                 mkdirSync(userMediaPath, { recursive: true })
@@ -47,22 +49,23 @@ export function createMediaResolver(ctx: CoreContext): MessageResolver {
               const mediaFetched = await ctx.getClient().downloadMedia(media.apiMedia)
 
               const mediaPath = join(userMediaPath, message.platformMessageId)
+              logger.withFields({ mediaPath }).verbose('Media path')
               if (mediaFetched instanceof Buffer) {
                 // write file to disk async
                 void writeFile(mediaPath, mediaFetched)
               }
 
               return {
-                ...message,
-                media: [{
-                  apiMedia: media.apiMedia,
-                  media: mediaFetched,
-                }],
-              } satisfies CoreMessage
+                apiMedia: media.apiMedia,
+                media: mediaFetched,
+              }
             }),
           )
 
-          return fetchedMessages
+          return {
+            ...message,
+            media: fetchedMedias,
+          } satisfies CoreMessage
         }),
       )
 

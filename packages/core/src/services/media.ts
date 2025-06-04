@@ -5,6 +5,7 @@ import { Buffer } from 'node:buffer'
 import { existsSync, mkdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { useLogger } from '@tg-search/common'
 import { getMediaPath, useConfig } from '@tg-search/common/composable'
 
 export interface MediaEventToCore {
@@ -54,6 +55,7 @@ export function createMediaService(ctx: CoreContext) {
       const mediaFetched = await getClient().downloadMedia(media)
 
       const mediaPath = join(userMediaPath, message.id.toString())
+      useLogger().withFields({ mediaPath }).verbose('Media path')
       if (mediaFetched instanceof Buffer) {
         // write file to disk async
         void writeFile(mediaPath, mediaFetched)
