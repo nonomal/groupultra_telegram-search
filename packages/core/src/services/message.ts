@@ -52,10 +52,10 @@ export function createMessageService(ctx: CoreContext) {
       logger.withFields({ count: messages.length }).verbose('Process messages')
 
       // Fetch media
-      const messagesWithMedia = messages.filter(message => message.media != null)
-      if (messagesWithMedia.length > 0) {
-        emitter.emit('media:fetch', { messages: messagesWithMedia })
-      }
+      // const messagesWithMedia = messages.filter(message => message.media != null)
+      // if (messagesWithMedia.length > 0) {
+      //   emitter.emit('media:fetch', { messages: messagesWithMedia })
+      // }
 
       const coreMessages = messages
         .map(message => convertToCoreMessage(message).orUndefined())

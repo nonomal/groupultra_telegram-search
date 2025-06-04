@@ -13,8 +13,15 @@ export function registerMediaEventHandlers(ctx: CoreContext) {
       await mediaService.fetchMedia(messages)
     })
 
-    emitter.on('media:data', async ({ path }) => {
+    emitter.on('media:data', async ({ path, message, media }) => {
       logger.withFields({ path }).log('Media data received')
+
+      emitter.emit('message:process', { messages: [
+        {
+          ...message,
+          media: [{ apiMedia: message.media!, media }],
+        },
+      ] })
     })
   }
 }

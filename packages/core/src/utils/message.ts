@@ -31,9 +31,7 @@ export interface CoreMessage {
 }
 
 export interface CoreMessageMedia {
-  type: 'photo' | 'video' | 'audio' | 'document'
-  uuid: UUID
-  path: string
+  apiMedia: Api.TypeMessageMedia
   media: string | Buffer<ArrayBufferLike> | undefined
 }
 
@@ -108,6 +106,15 @@ export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> 
     replyToName: undefined, // Needs async user lookup
   }
 
+  // Waiting for media resolver to fetch media
+  const media: CoreMessageMedia[] = []
+  if (message.media) {
+    media.push({
+      apiMedia: message.media,
+      media: undefined,
+    })
+  }
+
   return Ok(
     {
       uuid: crypto.randomUUID(),
@@ -117,6 +124,7 @@ export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> 
       fromId,
       fromName,
       content,
+      media,
       reply,
       forward,
       vectors: {
