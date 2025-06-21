@@ -1,5 +1,11 @@
 # Telegram Search
 
+> 唯一官方网站为 `intentchat.app`，其他网站均为诈骗。
+
+> 我们未发行任何虚拟货币，请勿上当受骗。
+
+> 本软件仅可导出您自己的聊天记录以便搜索，请勿用于非法用途。
+
 [English](./README_EN.md) | [快速开始](./getting-started.md)
 
 [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/+Gs3SH2qAPeFhYmU9)
@@ -20,48 +26,73 @@
 
 ## 🚀 快速开始
 
-### 安装步骤
+这是启动 Telegram Search 的最简便的方式，它会通过 Docker 启动所有必需的服务（包括数据库和应用服务器）。
 
-1. 克隆仓库：
+1.  **克隆仓库：**
 
-```bash
-git clone https://github.com/GramSearch/telegram-search.git
-cd telegram-search
-```
+    ```bash
+    git clone https://github.com/GramSearch/telegram-search.git
+    cd telegram-search
+    ```
 
-2. 安装依赖：
+2.  **设定配置：**
+    根据需要，修改 `config/config.yaml` 中的设置。\
+    务必修改配置中的 `database.host` 的值为数据库容器的服务名称 "pgvector"。
+    ```bash
+    cp config/config.example.yaml config/config.yaml
+    ```
 
-```bash
-pnpm install
-```
+3.  **启动服务：**
 
-3. 配置环境：
+    ```bash
+    docker compose up -d
+    ```
 
-```bash
-cp config/config.example.yaml config/config.yaml
-```
+访问 `http://<host>:3333` 即可打开搜索界面。
 
-4. 启动数据库容器：
+## 💻 本地运行
 
-```bash
-docker compose up -d
-```
+1.  **克隆仓库**
 
-5. 同步数据库表结构：
+    ```bash
+    git clone https://github.com/GramSearch/telegram-search.git
+    cd telegram-search
+    ```
 
-```bash
-pnpm run db:migrate
-```
+2.  **安装依赖：**
 
-6. 启动服务：
+    ```bash
+    pnpm install
+    ```
 
-```bash
-# 启动后端服务
-pnpm run dev:server
+3.  **配置环境**:
 
-# 启动前端界面
-pnpm run dev:frontend
-```
+    ```bash
+    cp config/config.example.yaml config/config.yaml
+    ```
+
+4.  **启动数据库容器：**
+    在本地开发模式下， Docker 只用来启动数据库容器。
+
+    ```bash
+    docker compose up -d pgvector
+    ```
+
+5.  **同步数据库表结构：**
+
+    ```bash
+    pnpm run db:migrate
+    ```
+
+6.  **启动服务：**
+
+    ```bash
+    # 启动后端服务
+    pnpm run dev:server
+
+    # 启动前端界面
+    pnpm run dev:frontend
+    ```
 
 访问 `http://localhost:3333` 即可打开搜索界面。
 
