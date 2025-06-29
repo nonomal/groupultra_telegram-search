@@ -1,14 +1,17 @@
+import type { Buffer } from 'node:buffer'
 import type { UUID } from 'node:crypto'
-import type { Result } from './monad'
 
+import type { Result } from '@tg-search/common/utils/monad'
+
+import { randomUUID } from 'node:crypto'
+
+import { Err, Ok } from '@tg-search/common/utils/monad'
 import { Api } from 'telegram'
-
-import { Err, Ok } from './monad'
 
 export interface CoreMessage {
   uuid: UUID
 
-  platform: string // Telegram
+  platform: 'telegram'
   platformMessageId: string
   chatId: string
 
@@ -16,6 +19,7 @@ export interface CoreMessage {
   fromName: string
 
   content: string
+  media?: CoreMessageMedia[]
 
   reply: CoreMessageReply
   forward: CoreMessageForward
@@ -28,10 +32,25 @@ export interface CoreMessage {
   deletedAt?: number
 }
 
-// export interface CoreMessageMedia {
-//   type: 'photo' | 'sticker' | 'file' | 'other'
-//   uuid:
-// }
+export type CoreMessageMediaTypes = 'photo' | 'sticker' | 'unknown'
+
+export interface CoreMessageMedia {
+  type: CoreMessageMediaTypes
+  messageUUID?: UUID
+  base64: string | undefined
+  path?: string
+  byte?: Buffer | undefined
+  apiMedia?: unknown // Api.TypeMessageMedia
+}
+
+export function parseMediaType(apiMedia: Api.TypeMessageMedia): CoreMessageMediaTypes {
+  switch (true) {
+    case apiMedia instanceof Api.MessageMediaPhoto:
+      return 'photo'
+    default:
+      return 'unknown'
+  }
+}
 
 export interface CoreMessageReply {
   isReply: boolean
@@ -104,15 +123,26 @@ export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> 
     replyToName: undefined, // Needs async user lookup
   }
 
+  // Waiting for media resolver to fetch media
+  const media: CoreMessageMedia[] = []
+  if (message.media) {
+    media.push({
+      type: parseMediaType(message.media),
+      apiMedia: message.media,
+      base64: undefined,
+    })
+  }
+
   return Ok(
     {
-      uuid: crypto.randomUUID(),
+      uuid: randomUUID(),
       platform: 'telegram',
       platformMessageId: messageId,
       chatId,
       fromId,
       fromName,
       content,
+      media,
       reply,
       forward,
       vectors: {
