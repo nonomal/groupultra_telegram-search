@@ -1,14 +1,17 @@
+import type { Buffer } from 'node:buffer'
 import type { UUID } from 'node:crypto'
-import type { Result } from './monad'
 
+import type { Result } from '@tg-search/common/utils/monad'
+
+import { randomUUID } from 'node:crypto'
+
+import { Err, Ok } from '@tg-search/common/utils/monad'
 import { Api } from 'telegram'
-
-import { Err, Ok } from './monad'
 
 export interface CoreMessage {
   uuid: UUID
 
-  platform: string // Telegram
+  platform: 'telegram'
   platformMessageId: string
   chatId: string
 
@@ -16,6 +19,7 @@ export interface CoreMessage {
   fromName: string
 
   content: string
+  media?: CoreMessageMedia[]
 
   reply: CoreMessageReply
   forward: CoreMessageForward
@@ -28,10 +32,36 @@ export interface CoreMessage {
   deletedAt?: number
 }
 
-// export interface CoreMessageMedia {
-//   type: 'photo' | 'sticker' | 'file' | 'other'
-//   uuid:
-// }
+export type CoreMessageMediaTypes = 'photo' | 'sticker' | 'document' | 'webpage' | 'unknown'
+
+export interface CoreMessageMedia {
+  type: CoreMessageMediaTypes
+  messageUUID?: UUID
+  path?: string
+  byte?: Buffer
+  blobUrl?: string
+  apiMedia?: unknown // Api.TypeMessageMedia
+}
+
+export function parseMediaType(apiMedia: Api.TypeMessageMedia): CoreMessageMediaTypes {
+  switch (true) {
+    case apiMedia instanceof Api.MessageMediaPhoto:
+      return 'photo'
+    case apiMedia instanceof Api.MessageMediaDocument:
+      // TODO: Better way to check if it's a sticker
+      if (apiMedia.document && apiMedia.document.className === 'Document') {
+        const isSticker = apiMedia.document.attributes.find((attr: any) => attr.className === 'DocumentAttributeSticker')
+        if (isSticker) {
+          return 'sticker'
+        }
+      }
+      return 'document'
+    case apiMedia instanceof Api.MessageMediaWebPage:
+      return 'webpage'
+    default:
+      return 'unknown'
+  }
+}
 
 export interface CoreMessageReply {
   isReply: boolean
@@ -104,15 +134,25 @@ export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> 
     replyToName: undefined, // Needs async user lookup
   }
 
+  // Waiting for media resolver to fetch media
+  const media: CoreMessageMedia[] = []
+  if (message.media) {
+    media.push({
+      type: parseMediaType(message.media),
+      apiMedia: message.media,
+    })
+  }
+
   return Ok(
     {
-      uuid: crypto.randomUUID(),
+      uuid: randomUUID(),
       platform: 'telegram',
       platformMessageId: messageId,
       chatId,
       fromId,
       fromName,
       content,
+      media,
       reply,
       forward,
       vectors: {

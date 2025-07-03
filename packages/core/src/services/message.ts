@@ -1,13 +1,15 @@
+import type { CorePagination } from '@tg-search/common/utils/pagination'
+
 import type { CoreContext } from '../context'
 import type { MessageResolverRegistryFn } from '../message-resolvers'
 import type { CoreMessage } from '../utils/message'
-import type { CorePagination } from '../utils/pagination'
 
 import { useLogger } from '@tg-search/common'
+import { Err, Ok } from '@tg-search/common/utils/monad'
+import defu from 'defu'
 import { Api } from 'telegram'
 
 import { convertToCoreMessage } from '../utils/message'
-import { Err, Ok } from '../utils/monad'
 
 export interface MessageEventToCore {
   'message:fetch': (data: { chatId: string, pagination: CorePagination }) => void
@@ -68,10 +70,35 @@ export function createMessageService(ctx: CoreContext) {
         logger.withFields({ name }).verbose('Process messages with resolver')
 
         try {
-          const result = (await resolver.run({ messages: emitMessages })).unwrap()
-          // logger.withFields({ result }).debug('Processed messages result')
-          emitMessages = result.length > 0 ? result : emitMessages
-          // logger.withFields({ emitMessages }).debug('Processed messages')
+          let result: CoreMessage[] = []
+
+          if (resolver.run) {
+            result = (await resolver.run({ messages: emitMessages })).unwrap()
+          }
+          else if (resolver.stream) {
+            for await (const message of resolver.stream({ messages: emitMessages })) {
+              result.push(message)
+              emitter.emit('message:data', { messages: [message] })
+            }
+          }
+
+          if (result.length > 0) {
+            // Using defu to merge two arrays of objects (emitMessages and result) is unsafe.
+            // defu merges arrays by index. If a resolver filters some messages and result
+            // becomes shorter than emitMessages, this will lead to incorrect merges and data
+            // corruption. For example, result[1] might be merged into emitMessages[1] even
+            // if they correspond to different original messages.
+
+            // A safer approach is to merge messages based on a unique identifier, like the uuid property.
+            // The general idea is to create a Map from the result array for efficient lookups and then mapping
+            // over emitMessages to merge correctly.
+
+            const resultByUuid = new Map(result.map(m => [m.uuid, m]))
+            emitMessages = emitMessages.map((m) => {
+              const resolved = resultByUuid.get(m.uuid)
+              return resolved ? defu(m, resolved) : m
+            })
+          }
         }
         catch (error) {
           logger.withFields({ error }).warn('Failed to process messages')
