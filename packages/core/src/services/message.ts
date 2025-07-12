@@ -1,13 +1,14 @@
+import type { CorePagination } from '@tg-search/common/utils/pagination'
+
 import type { CoreContext } from '../context'
 import type { MessageResolverRegistryFn } from '../message-resolvers'
 import type { CoreMessage } from '../utils/message'
-import type { CorePagination } from '../utils/pagination'
 
-import { useLogger } from '@tg-search/common'
+import { useLogger } from '@tg-search/logg'
+import { Err, Ok } from '@tg-search/result'
 import { Api } from 'telegram'
 
 import { convertToCoreMessage } from '../utils/message'
-import { Err, Ok } from '../utils/monad'
 
 export interface MessageEventToCore {
   'message:fetch': (data: { chatId: string, pagination: CorePagination }) => void
@@ -62,23 +63,34 @@ export function createMessageService(ctx: CoreContext) {
       // Return the messages first
       emitter.emit('message:data', { messages: coreMessages })
 
+      // Storage the messages first
+      emitter.emit('storage:record:messages', { messages: coreMessages })
+
       // Embedding or resolve messages
-      let emitMessages: CoreMessage[] = coreMessages
       for (const [name, resolver] of resolvers.registry.entries()) {
         logger.withFields({ name }).verbose('Process messages with resolver')
 
         try {
-          const result = (await resolver.run({ messages: emitMessages })).unwrap()
-          // logger.withFields({ result }).debug('Processed messages result')
-          emitMessages = result.length > 0 ? result : emitMessages
-          // logger.withFields({ emitMessages }).debug('Processed messages')
+          let result: CoreMessage[] = []
+
+          if (resolver.run) {
+            result = (await resolver.run({ messages: coreMessages })).unwrap()
+          }
+          else if (resolver.stream) {
+            for await (const message of resolver.stream({ messages: coreMessages })) {
+              result.push(message)
+              emitter.emit('message:data', { messages: [message] })
+            }
+          }
+
+          if (result.length > 0) {
+            emitter.emit('storage:record:messages', { messages: result })
+          }
         }
         catch (error) {
           logger.withFields({ error }).warn('Failed to process messages')
         }
       }
-
-      emitter.emit('storage:record:messages', { messages: emitMessages })
     }
 
     async function* fetchMessages(

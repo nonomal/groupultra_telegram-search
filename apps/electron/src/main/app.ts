@@ -1,11 +1,15 @@
 import type { CoreContext, CoreEventData, FromCoreEvent, ToCoreEvent } from '@tg-search/core'
 import type { BrowserWindow } from 'electron/main'
+
 import type { WsEventToClientData, WsMessageToClient, WsMessageToServer } from './ws-event'
 
 import process from 'node:process'
-import { initLogger, parseEnvFlags, useLogger } from '@tg-search/common'
-import { initConfig } from '@tg-search/common/composable'
-import { createCoreInstance, initDrizzle } from '@tg-search/core'
+
+import { parseEnvFlags } from '@tg-search/common'
+import { initConfig } from '@tg-search/common/node'
+import { createCoreInstance } from '@tg-search/core'
+import { initDrizzle } from '@tg-search/db'
+import { initLogger, useLogger } from '@tg-search/logg'
 import { ipcMain } from 'electron/main'
 
 import { createWsMessage } from './ws-event'

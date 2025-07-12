@@ -1,10 +1,11 @@
+import type { Result } from '@tg-search/result'
 import type { Dialog } from 'telegram/tl/custom/dialog'
+
 import type { CoreContext } from '../context'
-import type { Result } from '../utils/monad'
 
-import { circularObject, useLogger } from '@tg-search/common'
-
-import { Err, Ok } from '../utils/monad'
+import { circularObject } from '@tg-search/common'
+import { useLogger } from '@tg-search/logg'
+import { Err, Ok } from '@tg-search/result'
 
 export type DialogType = 'user' | 'group' | 'channel'
 
