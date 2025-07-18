@@ -1,33 +1,20 @@
 {
   "name": "@tg-search/common",
   "type": "module",
-  "version": "1.0.0-beta.11",
+  "version": "1.0.0-beta.19",
   "private": true,
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "default": "./dist/index.mjs"
-    },
-    "./composable": {
-      "types": "./dist/composable/index.d.mts",
-      "default": "./dist/composable/index.mjs"
-    }
+    ".": "./src/index.ts",
+    "./node": "./src/node/index.ts",
+    "./utils/*": "./src/utils/*.ts"
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "tsdown",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@guiiai/logg": "^1.0.10",
     "@pnpm/find-workspace-dir": "^1000.1.0",
+    "@tg-search/logg": "catalog:",
     "defu": "^6.1.4",
-    "error-stack-parser": "^2.1.4",
     "path-browserify-esm": "^1.0.6",
     "pathe": "^2.0.3",
     "valibot": "^1.1.0",

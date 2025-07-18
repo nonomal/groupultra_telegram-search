@@ -1,13 +1,14 @@
 import type { ProxyConfig } from '@tg-search/common'
+import type { Result } from '@tg-search/result'
 import type { ProxyInterface } from 'telegram/network/connection/TCPMTProxy'
 import type { StringSession } from 'telegram/sessions'
-import type { CoreContext } from '../context'
-import type { Result } from '../utils/monad'
 
-import { useLogger } from '@tg-search/common'
+import type { CoreContext } from '../context'
+
+import { useLogger } from '@tg-search/logg'
+import { Err, Ok } from '@tg-search/result'
 import { Api, TelegramClient } from 'telegram'
 
-import { Err, Ok } from '../utils/monad'
 import { waitForEvent } from '../utils/promise'
 
 export interface ConnectionEventToCore {
@@ -21,6 +22,7 @@ export interface ConnectionEventFromCore {
   'auth:code:needed': () => void
   'auth:password:needed': () => void
   'auth:connected': () => void
+  'auth:error': (data: { error: unknown }) => void
 }
 
 export type ConnectionEvent = ConnectionEventFromCore & ConnectionEventToCore
@@ -127,6 +129,7 @@ export function createConnectionService(ctx: CoreContext) {
               return password
             },
             onError: (err: Error) => {
+              emitter.emit('auth:error', { error: err })
               withError(err, 'Failed to sign in to Telegram')
             },
           })
@@ -148,6 +151,7 @@ export function createConnectionService(ctx: CoreContext) {
         return Ok(client)
       }
       catch (error) {
+        emitter.emit('auth:error', { error })
         return Err(withError(error, 'Failed to connect to Telegram'))
       }
     }

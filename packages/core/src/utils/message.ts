@@ -1,14 +1,20 @@
 import type { UUID } from 'node:crypto'
-import type { Result } from './monad'
 
+import type { Result } from '@tg-search/result'
+
+import type { CoreMessageMediaFromServer } from './media'
+
+import { randomUUID } from 'node:crypto'
+
+import { Err, Ok } from '@tg-search/result'
 import { Api } from 'telegram'
 
-import { Err, Ok } from './monad'
+import { parseMediaId, parseMediaType } from './media'
 
 export interface CoreMessage {
   uuid: UUID
 
-  platform: string // Telegram
+  platform: 'telegram'
   platformMessageId: string
   chatId: string
 
@@ -16,6 +22,7 @@ export interface CoreMessage {
   fromName: string
 
   content: string
+  media?: CoreMessageMediaFromServer[]
 
   reply: CoreMessageReply
   forward: CoreMessageForward
@@ -27,11 +34,6 @@ export interface CoreMessage {
   updatedAt?: number
   deletedAt?: number
 }
-
-// export interface CoreMessageMedia {
-//   type: 'photo' | 'sticker' | 'file' | 'other'
-//   uuid:
-// }
 
 export interface CoreMessageReply {
   isReply: boolean
@@ -53,12 +55,15 @@ export interface CoreMessageVector {
 }
 
 export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> {
+  const messageUUID = randomUUID()
+
   const sender = message.sender
   const senderId = message.senderId
   if ((!sender && !senderId) || (sender instanceof Api.UserEmpty) || (sender instanceof Api.ChatEmpty)) {
     return Err(new Error(`Message ${message.id} has no sender or sender is empty`))
   }
 
+  // FIXME: space
   let fromName = ''
   if (sender instanceof Api.User) {
     if ([sender.firstName, sender.lastName].some(Boolean)) {
@@ -104,15 +109,28 @@ export function convertToCoreMessage(message: Api.Message): Result<CoreMessage> 
     replyToName: undefined, // Needs async user lookup
   }
 
+  // Waiting for media resolver to fetch media
+  const media: CoreMessageMediaFromServer[] = []
+  if (message.media) {
+    media.push({
+      messageUUID,
+      type: parseMediaType(message.media),
+      apiMedia: message.media,
+      platformId: parseMediaId(message.media),
+      byte: undefined,
+    })
+  }
+
   return Ok(
     {
-      uuid: crypto.randomUUID(),
+      uuid: messageUUID,
       platform: 'telegram',
       platformMessageId: messageId,
       chatId,
       fromId,
       fromName,
       content,
+      media,
       reply,
       forward,
       vectors: {

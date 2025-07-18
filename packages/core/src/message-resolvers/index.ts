@@ -1,14 +1,16 @@
-import type { CoreMessage } from '../utils/message'
-import type { Result } from '../utils/monad'
+import type { Result } from '@tg-search/result'
 
-import { useLogger } from '@tg-search/common'
+import type { CoreMessage } from '../utils/message'
+
+import { useLogger } from '@tg-search/logg'
 
 export interface MessageResolverOpts {
   messages: CoreMessage[]
 }
 
 export interface MessageResolver {
-  run: (opts: MessageResolverOpts) => Promise<Result<CoreMessage[]>>
+  run?: (opts: MessageResolverOpts) => Promise<Result<CoreMessage[]>>
+  stream?: (opts: MessageResolverOpts) => AsyncGenerator<CoreMessage>
 }
 
 export type MessageResolverRegistryFn = ReturnType<typeof useMessageResolverRegistry>
